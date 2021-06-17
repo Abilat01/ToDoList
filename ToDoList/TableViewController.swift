@@ -16,7 +16,7 @@ class TableViewController: UITableViewController {
     @IBAction func saveTask(_ sender: UIBarButtonItem) {
         
         let alertControler = UIAlertController(title: "New Task", message: "Please add new task", preferredStyle: .alert)
-        let seveAction = UIAlertAction(title: "Seve", style: .default) { action in
+        let seveAction = UIAlertAction(title: "Save", style: .default) { action in
             
             let tf = alertControler.textFields?.first
             if let newTaskTitle = tf?.text {
@@ -82,6 +82,11 @@ class TableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+    }
+    
+    //очистка всей таблицы из памяти
+    @IBAction func clearAll(_ sender: UIBarButtonItem) {
+        
         let context = getContext()
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
         if let objects = try? context.fetch(fetchRequest) {
@@ -92,13 +97,13 @@ class TableViewController: UITableViewController {
         
         do {
             try context.save()
+            tasks.removeAll()
         } catch let error as NSError {
             print(error.localizedDescription)
         }
-        
-
+        tableView.reloadData()
     }
-
+    
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -119,5 +124,25 @@ class TableViewController: UITableViewController {
 
         return cell
     }
-
+    
+    //метод проверяющий нажатие на ячейку
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let alertControler = UIAlertController(title: "Информационное сообщение", message: "Вы нажали на ячейку", preferredStyle: .alert)
+        let alertOk = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertControler.addAction(alertOk)
+        present(alertControler, animated: true, completion: nil)
+        
+        tableView.deselectRow(at: indexPath, animated: true) //по indexPath
+    }
+    
+    //метод позволяющий удалять выбранные ячейки свайпом
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    
+        if editingStyle == .delete {
+                   self.tasks.remove(at: indexPath.row)
+               }
+               tableView.deleteRows(at: [indexPath], with: .fade)
+        
+    }
 }
